@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LavkaDor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body oncontextmenu="return false;">
+
+<div class="app">
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title"></h3>
+            <p id="modal-text"></p>
+            <button class="close-modal" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="hero">
+        <div class="hero-title">
+            <span style="--i:1">L</span>
+            <span style="--i:2">a</span>
+            <span style="--i:3">v</span>
+            <span style="--i:4">k</span>
+            <span style="--i:5">a</span>
+            <span style="--i:6">D</span>
+            <span style="--i:7">o</span>
+            <span style="--i:8">r</span>
+        </div>
+        <div class="hero-sub">
+            Проверь, насколько ты знаешь дорамы
+        </div>
+    </div>
+
+    <div id="home" class="screen active">
+        <div class="home-content">
+            <h2>💖Любишь дорамы?</h2>
+            <input type="text" id="usernameInput" class="name-input" placeholder="Введи своё имя 💖">
+            <button class="start-btn" onclick="goDoramas()">Начать</button>
+        </div>
+    </div>
+
+    <div id="doramas" class="screen">
+        <div class="doramas-header">
+            <button class="back-btn" onclick="backHome()">←</button>
+            <h2 style="font-size: 20px; margin: 0;">🎬 Выбери дораму</h2>
+            <div style="width: 24px;"></div>
+        </div>
+
+        <button class="mini-neon-suggest-btn" onclick="toggleSuggestion()">💌 Предложи момент для Тик Тока</button>
+
+        <div id="suggestionBox" class="suggestion-box">
+            <h3>💌 Предложи момент для Тик Тока</h3>
+            <p>Напиши сцену из дорамы, которую стоит выложить в Тик Ток 💖</p>
+            
+            <div class="input-group">
+                <label>Название дорамы</label>
+                <input type="text" id="suggestDorama" placeholder="Например: Королева слёз">
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>Серия</label>
+                    <input type="text" id="suggestEpisode" placeholder="Например: 10">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>Время (минута)</label>
+                    <input type="text" id="suggestTime" placeholder="Например: 01:00:37">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Короткое описание сцены</label>
+                <input type="text" id="suggestDesc" placeholder="Например: момент, где он осознаёт свои чувства">
+            </div>
+
+            <div class="input-group">
+                <label>💬 Почему именно этот момент?</label>
+                <textarea id="suggestReason" rows="2" placeholder="Очень сильная сцена, много эмоций"></textarea>
+            </div>
+            
+            <button class="send-suggest-btn" onclick="sendSuggestion()">📤 Отправить предложение</button>
+        </div>
+        
+        <div class="cards">
+
+            <div class="card">
+                <img src="images/koroleva-slyoz.jpg">
+                <h3>Королева слёз</h3>
+                <p>История любви, которая сломала сердца героев.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_tears">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_tears')" onchange="sendInstantRating('Королева слёз', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Королева слёз', 'История о кризисе в отношениях богатой наследницы и её мужа.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Королева слёз', 'queen_of_tears.html', 'val_tears')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/Истинная красота.jfif">
+                <h3>Истинная красота</h3>
+                <p>Секреты внешности и настоящая дружба в школе.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_beauty">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_beauty')" onchange="sendInstantRating('Истинная красота', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Истинная красота', 'Девушка использует макияж, чтобы изменить свою жизнь.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Истинная красота', 'uiz_true_beauty.html', 'val_beauty')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/26541b184d4c52e508d2d5c394d50340.jpg">
+                <h3>Дорогой X</h3>
+                <p>Любовь, боль и тайны.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_x">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_x')" onchange="sendInstantRating('Дорогой X', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Дорогой X', 'Психологическая драма о скрытых намерениях и чувствах.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Дорогой X', 'dear_x_quiz.html', 'val_x')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/440x660.jpeg">
+                <h3>Судья из Ада</h3>
+                <p>Справедливость без компромиссов.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_judge">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_judge')" onchange="sendInstantRating('Судья из Ада', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Судья из Ада', 'Демон в теле судьи вершит правосудие над грешниками.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Судья из Ада', 'judge_quiz.html', 'val_judge')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/610x900_70243.webp">
+                <h3>Мой демон</h3>
+                <p>Опасная сделка между демоном и наследницей.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_demon">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_demon')" onchange="sendInstantRating('Мой демон', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Мой демон', 'Демон теряет силы и связывает свою жизнь с обычной девушкой.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Мой демон', 'me_demon.html', 'val_demon')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/600x900.jpeg">
+                <h3>Хороший мальчик</h3>
+                <p>История про дружбу и искренние эмоции.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_boy">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_boy')" onchange="sendInstantRating('Хороший мальчик', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Хороший мальчик', 'О бывших спортсменах, вставных на путь борьбы с законом.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Хороший мальчик', 'Good_Boy.html', 'val_boy')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/which-is-better-the-weak-hero-show-k-drama-or-the-weak-hero-v0-6ry1a00zzkye1.jpg">
+                <h3>Слабый герой 1</h3>
+                <p>Когда характер сильнее кулаков.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_hero1">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_hero1')" onchange="sendInstantRating('Слабый герой 1', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Слабый герой 1', 'Умный парень противостоит школьному насилию.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Слабый герой 1', 'Weak_Hero_1', 'val_hero1')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/330px-Слабый_герой_2.jpg">
+                <h3>Слабый герой 2</h3>
+                <p>Продолжение пути силы духа.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_hero2">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_hero2')" onchange="sendInstantRating('Слабый герой 2', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Слабый герой 2', 'Новые вызовы и враги в новой школе.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Слабый герой 2', 'Weak_Hero_2', 'val_hero2')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/IMG-20260113-WA0071.jpg">
+                <h3>Король земли</h3>
+                <p>Амбиции, власть и чувства.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_land">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_land')" onchange="sendInstantRating('Король земли', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Король земли', 'Романтическая история любви в стенах роскошного отеля.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Король земли', 'King_the_Land.html', 'val_land')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/Болтун.jpg">
+                <h3>Болтун</h3>
+                <p>Слова могут быть опаснее оружия.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_mouth">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_mouth')" onchange="sendInstantRating('Болтун', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Болтун', 'Адвокат оказывается в центре опасного заговора.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Болтун', 'Big_Mouth.html', 'val_mouth')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/Алые сердца.jpg">
+                <h3>Алые сердца</h3>
+                <p>Любовь сквозь века.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_hearts">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_hearts')" onchange="sendInstantRating('Алые сердца', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Алые сердца', 'Путешествие во времени и борьба за трон.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Алые сердца', 'Bloody_Heart.html', 'val_hearts')">Викторина</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <img src="images/Слава.jpg">
+                <h3>Слава</h3>
+                <p>Месть, сила и путь к вершине.</p>
+                <div class="rating-container">
+                    <label class="rating-label">Оценка дорамы: <span class="rating-value" id="val_glory">0/10</span></label>
+                    <input type="range" min="0" max="10" value="0" class="range-slider" oninput="updateRating(this, 'val_glory')" onchange="sendInstantRating('Слава', this.value)">
+                </div>
+                <div class="card-buttons">
+                    <button class="neon-btn" onclick="openModal('Слава', 'Тщательно спланированная месть школьным обидчикам.')">Мини-сюжет</button>
+                    <button class="neon-btn" onclick="startQuiz('Слава', 'Glory.html', 'val_glory')">Викторина</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

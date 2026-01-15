@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Викторина Истинная красота</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="quiz-container" id="mainContainer">
+  <div class="channel-header">
+    <div class="channel-info">
+      <img src="images/Без названия116_20260113171220.png" alt="LavkaDor" class="channel-avatar">
+      <span class="channel-name">LavkaDor</span>
+    </div>
+    <button class="btn-subscribe" onclick="window.location.href='https://www.tiktok.com/@lavkador?_r=1&_t=ZN-9342zlMnoXO'">+ Подписаться</button>
+  </div>
+
+  <div class="timer" id="timer"><span id="timeText">30</span></div>
+
+  <div class="content-area">
+    <div class="quiz-title">Истинная красота</div>
+    
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+
+    <div id="qNumber" class="question-number" style="display:none;"></div>
+    <h3 id="question">Загрузка...</h3>
+    
+    <div id="answers"></div>
+
+    <div class="results" id="results">
+      <div class="result-screen">
+        <h2 id="congratsTitle">Поздравляем!</h2>
+        <div style="font-size: 60px; margin: 0;">🏆</div>
+        
+        <p id="userLevel">Ранг: Новичок</p>
+        
+        <div class="progress-bar" style="background: rgba(255,255,255,0.4); margin: 15px auto; width: 95%;">
+          <div class="progress-bar-fill" id="resultProgressFill" style="background: #ff68b4;"></div>
+        </div>
+        
+        <p style="font-size: 20px; font-weight: bold;">Баллы: <span id="scoreText">0/20</span></p>
+        <p style="font-size: 16px;">Время: <span id="timeTaken">0:00</span></p>
+        
+        <button class="btn-cta-main" onclick="window.location.href='https://www.tiktok.com/@lavkador?_r=1&_t=ZN-9342zlMnoXO'">Подписаться на LavkaDor</button>
+        
+        <div class="neon-grid">
+          <button class="btn-neon btn-purple" onclick="restartQuiz()"><span>🔄</span><span>Ещё</span></button>
+          <button class="btn-neon btn-gold" onclick="openRankModal()"><span>🏆</span><span>Ранг</span></button>
+          <button class="btn-neon btn-cyan" onclick="showAnswers()"><span>📊</span><span>Ответы</span></button>
+        </div>
+
+        <button class="btn-glass-share" onclick="shareResult()">📤 Поделиться результатом</button>
+      </div>
+      <button class="btn-try-again" onclick="restartQuiz()">Попробуй ещё раз.</button>
+    </div>
+    
+    <div id="answersContainer"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rankModal" onclick="this.style.display='none'">
+    <div class="rank-card" onclick="event.stopPropagation()">
+        <div class="rank-badge" id="modalBadge">🌱</div>
+        <h2 id="modalRankName" style="color:#ff3cac; margin:5px 0;">Новичок</h2>
+        <p id="modalRankDesc" class="rank-info-text">«Ты только начал путь в мир дорам 🌱»</p>
+        <hr style="border:0; border-top:1px solid #eee;">
+        <div style="text-align:left; font-size:14px; color:#333;">
+            <p>🥇 Рекорд: <b id="bestScore">0/20</b></p>
+            <p>⏱ Лучшее время: <b id="bestTime">--:--</b></p>
+            <p>🔁 Попыток: <b id="totalAttempts">0</b></p>
+        </div>
+        <button class="btn-subscribe" style="width:100%; margin-top:10px;" onclick="document.getElementById('rankModal').style.display='none'">Закрыть</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
