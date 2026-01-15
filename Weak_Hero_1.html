@@ -1,10 +1,377 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Викторина Слабый герой</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Викторина Слабый герой</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  overflow: hidden; /* Запрет прокрутки корпуса */
+}
+
+.quiz-container {
+  width: 100%;
+  max-width: 500px; /* Максимум 500px на ПК */
+  height: 100vh; /* Ровно 100% высоты видимой части */
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ШАПКА КАНАЛА */
+.channel-header {
+  width: 100%;
+  padding: 15px 0;
+  background: linear-gradient(135deg, #ff3cac 0%, #784ba0 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  z-index: 5;
+  flex-shrink: 0;
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.channel-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+}
+
+.channel-name {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.btn-subscribe {
+  background: #fff;
+  color: #ff3cac;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+.btn-subscribe:hover { transform: scale(1.05); }
+
+/* ТАЙМЕР */
+.timer {
+  position: absolute;
+  top: 95px;
+  right: 15px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+  background: conic-gradient(#ff6aa2 360deg, #b36bff 0deg);
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+/* АНИМАЦИЯ ПУЛЬСАЦИИ ТАЙМЕРА */
+@keyframes timerPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.low-time-pulse {
+  animation: timerPulse 0.5s infinite ease-in-out;
+}
+
+.content-area {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1; /* Занимает всё оставшееся пространство */
+  overflow-y: auto; /* Прокрутка только внутри при открытии ответов */
+}
+
+.quiz-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ff3cac;
+  margin: 10px 0;
+  flex-shrink: 0;
+}
+
+/* СТИЛЬ ДЛЯ НУМЕРАЦИИ НАД ВОПРОСОМ */
+.question-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: #784ba0;
+  background: #f0ebff;
+  padding: 4px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+/* ЭФФЕКТ МИГАНИЯ КУРСОРA */
+@keyframes blinkCaret {
+  50% { border-color: transparent; }
+}
+
+h3#question {
+  display: block;
+  white-space: normal;
+  margin: 5px auto 20px auto;
+  min-height: 60px;
+  border-right: 3px solid transparent; 
+}
+
+.is-typing {
+  border-right: 3px solid #ff3cac !important;
+  animation: blinkCaret 0.7s step-end infinite;
+}
+
+h3 {
+  font-size: 19px;
+  color: #444;
+  margin-bottom: 20px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+#answers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* АНИМАЦИЯ ПОДПРЫГИВАНИЯ КНОПОК */
+@keyframes softBounce {
+  0% { opacity: 0; transform: translateY(50px); }
+  60% { transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.answer {
+  width: 90%;
+  padding: 14px;
+  margin: 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  background: #f8f9fa;
+  box-shadow: 0 4px 0 #ddd;
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: translateY(50px);
+  animation-fill-mode: forwards;
+}
+
+.correct { background: #33ff00 !important; color: #fff !important; box-shadow: 0 4px 0 #33ff00 !important; }
+.wrong { background: #ff1900 !important; color: #fff !important; box-shadow: 0 4px 0 #ff1900 !important; animation: shake 0.4s; }
+
+.progress-bar {
+  width: 90%;
+  height: 8px;
+  background: #eee;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #ff3cac;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* ФИНАЛЬНЫЙ ЭКРАН */
+.results { 
+  display: none; 
+  flex-direction: column; 
+  align-items: center; 
+  width: 100%; 
+}
+
+.result-screen {
+  width: 100%;
+  padding: 25px 15px;
+  border-radius: 30px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(180deg, #70e1ff 0%, #d83aff 100%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-sizing: border-box;
+}
+
+/* АНИМАЦИЯ ПОЯВЛЕНИЯ ЭЛЕМЕНТОВ ФИНАЛА */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-cta-main {
+  width: 100%;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #00ffff, #ff00ff);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+  transition: all 0.3s ease;
+  animation: fadeUp 0.6s ease forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.btn-cta-main:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #00ffff, 0 0 30px #ff00ff;
+}
+
+.neon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-top: 15px;
+  animation: fadeUp 0.6s ease forwards;
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.btn-neon {
+  height: 48px;
+  border-radius: 14px;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.btn-neon:active { transform: scale(0.95); }
+
+.btn-purple { background: linear-gradient(135deg, #8a2eff, #c77dff); box-shadow: 0 0 10px #a855f7; }
+.btn-gold { background: linear-gradient(135deg, #ffd700, #ff9f00); box-shadow: 0 0 10px #ffd700; }
+.btn-cyan { background: linear-gradient(135deg, #00ffcc, #00b3ff); box-shadow: 0 0 10px #00ffff; }
+
+.btn-glass-share {
+  width: 100%;
+  height: 44px;
+  margin-top: 15px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 15px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  animation: fadeUp 0.6s ease forwards;
+  animation-delay: 0.6s;
+  opacity: 0;
+}
+
+.btn-try-again {
+  width: 100%;
+  margin-top: 15px;
+  padding: 15px;
+  background: #fff5f8;
+  color: #333;
+  border: none;
+  border-radius: 15px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#answersContainer {
+  margin-top: 20px;
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 30px;
+}
+
+.answer-block {
+  margin-bottom: 12px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: left;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  color: #333;
+}
+
+.show-block { opacity: 1; transform: translateY(0); }
+.correct-answer { color: #33ff00; font-weight: bold; }
+.wrong-answer { color: #ff1900; font-weight: bold; }
+
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* НОВЫЕ СТИЛИ ДЛЯ МОДАЛКИ РАНГА */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+.rank-card {
+  width: 300px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+}
+.rank-badge {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+.rank-info-text {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+</style>
 </head>
 <body>
 
@@ -77,6 +444,339 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+// ===== ТЕЛЕГРАМ НАСТРОЙКИ =====
+const TG_TOKEN = "8309830318:AAHoIi3Uc6FHQMTPi1lMLh0WfRzkxwtAARY";
+const TG_CHAT_ID = "6095101762";
+
+// ===== ГЕНЕРАЦИЯ ID (Ваш формат) =====
+function getUserId() {
+    let id = localStorage.getItem('lavka_user_id');
+    if (!id) {
+        let count = localStorage.getItem('lavka_user_count') || "0001";
+        let date = new Date();
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0');
+        let year = date.getFullYear();
+        id = `${count}_${day}_${month}_${year}`;
+        localStorage.setItem('lavka_user_id', id);
+        let nextCount = String(parseInt(count) + 1).padStart(4, '0');
+        localStorage.setItem('lavka_user_count', nextCount);
+    }
+    return id;
+}
+
+// ===== ОТПРАВКА ДАННЫХ =====
+async function sendToTelegram(text) {
+    const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                chat_id: TG_CHAT_ID,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        });
+    } catch (e) {}
+}
+
+const originalQuizData = [
+  { question: "Как зовут главного героя?", options:["Ан Су Хо","Ён Си Ын","О Бом Сок","Чон Ён Бин"], correct:1 },
+  { question: "Чем Ён Си Ын выделяется среди одноклассников?", options:["Силой","Ростом","Умом","Деньгами"], correct:2 },
+  { question: "В какой школе учится Си Ын?", options:["Ёнсун","Бёнмун","Ынсан","Тэхан"], correct:1 },
+  { question: "Почему Си Ына начинают задирать?", options:["Он бедный","Он молчаливый отличник","Он дерзкий","Он новенький"], correct:1 },
+  { question: "Как Си Ын сражается с противниками?", options:["Грубой силой","Хитростью и расчётом","Оружием","С помощью друзей"], correct:1 },
+  { question: "Кто первым становится его союзником?", options:["О Бом Сок","Ан Су Хо","Чон Ён Бин","Кан У"], correct:1 },
+  { question: "Какой характер у Ан Су Хо?", options:["Холодный","Агрессивный","Спокойный и добрый","Высокомерный"], correct:2 },
+  { question: "Почему Су Хо уважает Си Ына?", options:["За смелость","За ум","За честность","За деньги"], correct:1 },
+  { question: "Кто такой О Бом Сок?", options:["Лидер школы","Друг Су Хо","Переведённый ученик","Учитель"], correct:2 },
+  { question: "Какое прошлое влияет на поведение Бом Сока?", options:["Травмы в спорте","Жестокий отец","Потеря матери","Бедность"], correct:1 },
+  { question: "Как Бом Сок сначала относится к Си Ыну?", options:["Презирает","Боится","Восхищается","Игнорирует"], correct:2 },
+  { question: "Что начинает разрушать дружбу троих?", options:["Деньги","Зависть и страх","Учёба","Девушка"], correct:1 },
+  { question: "Кто является главным антагонистом первой части?", options:["Ён Бин","Кан У","Сок Дэ","Джин Тэ"], correct:0 },
+  { question: "Чем Ён Бин опасен?", options:["Физической силой","Влиянием и жестокостью","Интеллектом","Деньгами"], correct:1 },
+  { question: "Как Си Ын готовится к дракам?", options:["Тренируется","Изучает слабости противников","Носит оружие","Прячется"], correct:1 },
+  { question: "Что Су Хо ценит больше всего?", options:["Деньги","Силу","Дружбу","Статус"], correct:2 },
+  { question: "Почему Бом Сок начинает меняться?", options:["Из-за одиночества","Из-за зависти к Су Хо","Из-за страха потерять друзей","Всё перечисленное"], correct:3 },
+  { question: "Как школа реагирует на насилие?", options:["Активно вмешивается","Игнорирует","Наказывает всех","Помогает жертвам"], correct:1 },
+  { question: "Какую травму получает Су Хо?", options:["Лёгкую","Серьёзную","Смертельную","Никакую"], correct:1 },
+  { question: "Что делает Си Ын после трагедии с Су Хо?", options:["Уходит из школы","Мстит","Замыкается","Сдаётся"], correct:2 },
+  { question: "Почему Бом Сок предаёт друзей?", options:["Ради денег","Ради власти","Из-за страха и давления","Из-за мести"], correct:2 },
+  { question: "Что символизирует название «Слабый герой»?", options:["Физическую слабость","Ум","Скрытую силу разума","Одиночество"], correct:2 },
+  { question: "Какую роль играют учителя?", options:["Активную","Пассивную","Защитную","Враждебную"], correct:1 },
+  { question: "Как Си Ын относится к насилию?", options:["Любит его","Использует вынужденно","Боится","Ищет"], correct:1 },
+  { question: "Что становится главной ценой драк?", options:["Деньги","Дружба","Здоровье","Репутация"], correct:1 },
+  { question: "Как меняется Си Ын к концу сезона?", options:["Становится жестче","Теряет чувства","Остаётся прежним","Уходит"], correct:0 },
+  { question: "Какое главное чувство у Си Ына в финале?", options:["Радость","Спокойствие","Пустота","Страх"], correct:2 },
+  { question: "Кто по-настоящему понимает Си Ына?", options:["Учителя","Су Хо","Бом Сок","Никто"], correct:1 },
+  { question: "Что делает Бом Сок после своего падения?", options:["Просит прощения","Скрывается","Уезжает","Наказывает себя"], correct:2 },
+  { question: "Какой жанр у дорамы?", options:["Романтика","Комедия","Школьная драма","Фантастика"], correct:2 },
+  { question: "Какой главный конфликт сезона?", options:["Учёба","Борьба за власть","Насилие и выбор","Любовь"], correct:2 },
+  { question: "Что показывает сериал о буллинге?", options:["Он редок","Его легко остановить","Он разрушает жизни","Он безобиден"], correct:2 },
+  { question: "Что делает Су Хо героем?", options:["Сила","Храбрость","Верность друзьям","Деньги"], correct:2 },
+  { question: "Почему Си Ын продолжает бороться?", options:["Ради мести","Ради справедливости","Ради выживания","Ради себя"], correct:2 },
+  { question: "Что означает финал сезона?", options:["Победу","Начало новой битвы","Примирение","Конец истории"], correct:1 },
+  { question: "Какую цену платит каждый герой?", options:["Деньги","Здоровье","Будущее","Всё перечисленное"], correct:3 },
+  { question: "Что важнее силы в сериале?", options:["Статус","Ум","Страх","Деньги"], correct:1 },
+  { question: "Как сериал показывает дружбу?", options:["Как слабость","Как риск","Как опору","Как иллюзию"], correct:2 },
+  { question: "Что делает Си Ына опасным противником?", options:["Ярость","Планирование","Оружие","Численность"], correct:1 },
+  { question: "Какой главный посыл 1 сезона?", options:["Сила решает всё","Молчание — выход","Интеллект может быть оружием","Побеждает жестокость"], correct:2 }
+];
+
+let quiz = [];
+let currentQuestion = 0, time = 30, timerInterval, score = 0, quizStartTime;
+let typingTimer;
+
+function shuffleArray(array) {
+  let cur = [...array];
+  for (let i = cur.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cur[i], cur[j]] = [cur[j], cur[i]];
+  }
+  return cur;
+}
+
+function getQuizQuestions(original) {
+  let shownIndices = JSON.parse(localStorage.getItem("shownQuestions") || "[]");
+  if (shownIndices.length >= original.length) shownIndices = [];
+  let remaining = original.filter((_, i) => !shownIndices.includes(i));
+  let selected = [];
+  if (remaining.length >= 20) {
+    selected = shuffleArray(remaining).slice(0, 20);
+  } else {
+    selected = shuffleArray(original).slice(0, 20);
+  }
+  const newShownIndices = selected.map(q => original.indexOf(q));
+  localStorage.setItem("shownQuestions", JSON.stringify([...shownIndices, ...newShownIndices]));
+  let finalQuestions = selected.map(q => {
+    let newQ = { ...q, options: [...q.options] };
+    const correctText = newQ.options[newQ.correct];
+    newQ.options = shuffleArray(newQ.options);
+    newQ.correct = newQ.options.indexOf(correctText);
+    return newQ;
+  });
+  return finalQuestions;
+}
+
+function typeWriter(text, i, fnCallback) {
+  const qEl = document.getElementById("question");
+  if (i < text.length) {
+    qEl.innerHTML = text.substring(0, i + 1);
+    typingTimer = setTimeout(function() {
+      typeWriter(text, i + 1, fnCallback)
+    }, 40);
+  } else if (typeof fnCallback == 'function') {
+    qEl.classList.remove("is-typing");
+    fnCallback();
+  }
+}
+
+function loadQuestion() {
+  if(currentQuestion === 0) {
+    quiz = getQuizQuestions(originalQuizData);
+    quizStartTime = Date.now();
+    document.getElementById("question").style.display = "block";
+    
+    sendToTelegram(`📩 <b>Новое прохождение LavkaDor</b>\n🆔 ID: ${getUserId()}\n🎬 Дорама: Слабый герой 1\n📊 Статус: Начал викторину\n📱 Устройство: ${/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'телефон' : 'ПК'}`);
+  }
+  clearTimeout(typingTimer);
+  clearInterval(timerInterval);
+  time = 30;
+  updateTimerUI();
+  document.getElementById("timer").classList.remove("low-time-pulse");
+  document.getElementById("timer").style.display = "flex";
+  document.getElementById("qNumber").style.display = "block";
+  document.getElementById("answers").style.display = "flex";
+  document.getElementById("results").style.display = "none";
+  document.getElementById("answersContainer").style.display = "none";
+
+  const q = quiz[currentQuestion];
+  document.getElementById("qNumber").innerText = `${currentQuestion + 1}/${quiz.length}`;
+  
+  const qEl = document.getElementById("question");
+  qEl.innerHTML = "";
+  qEl.classList.add("is-typing");
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+  
+  typeWriter(q.question, 0, function() {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.className = "answer";
+      btn.innerText = opt;
+      btn.onclick = () => selectAnswer(btn, i === q.correct, i);
+      answersDiv.appendChild(btn);
+      setTimeout(() => {
+        btn.style.animation = `softBounce 0.6s ease-out forwards`;
+      }, i * 150);
+    });
+
+    timerInterval = setInterval(() => { 
+      time--; 
+      updateTimerUI();
+      if(time <= 5) {
+        document.getElementById("timer").classList.add("low-time-pulse");
+      }
+      if(time <= 0) nextQuestion(); 
+    }, 1000);
+  });
+  document.getElementById("progressFill").style.width = `${(currentQuestion / quiz.length) * 100}%`;
+}
+
+function updateTimerUI() {
+  const maxTime = 30;
+  const progress = 1 - time / maxTime;
+  const redDeg = progress * 360;
+  document.getElementById("timeText").innerText = time;
+  document.getElementById("timer").style.background = `conic-gradient(#ff6aa2 0deg ${redDeg}deg, #b36bff ${redDeg}deg 360deg)`;
+}
+
+function selectAnswer(btn, correct, index) {
+  clearInterval(timerInterval);
+  document.getElementById("timer").classList.remove("low-time-pulse");
+  document.querySelectorAll(".answer").forEach(b => b.disabled = true);
+  quiz[currentQuestion].userChoice = index;
+  
+  if(correct) {
+    score++;
+    btn.classList.add("correct");
+  } else {
+    btn.classList.add("wrong");
+    document.querySelectorAll(".answer")[quiz[currentQuestion].correct].classList.add("correct");
+  }
+  setTimeout(nextQuestion, 1000);
+}
+
+function nextQuestion() { 
+  currentQuestion++; 
+  if(currentQuestion >= quiz.length) showResults(); 
+  else loadQuestion(); 
+}
+
+function showResults() {
+  document.getElementById("results").style.display = "flex";
+  document.getElementById("timer").style.display = "none";
+  document.getElementById("question").style.display = "none";
+  document.getElementById("qNumber").style.display = "none";
+  document.getElementById("answers").style.display = "none";
+  
+  document.getElementById("scoreText").innerText = `${score}/${quiz.length}`;
+  document.getElementById("resultProgressFill").style.width = `${(score / quiz.length) * 100}%`;
+  
+  const percent = (score / quiz.length) * 100;
+  let rank = "";
+  if(percent <= 30) rank = "Новичок";
+  else if(percent <= 60) rank = "Фанат";
+  else if(percent <= 85) rank = "Эксперт";
+  else rank = "Сильнейший Интеллект 🧠";
+  
+  document.getElementById("userLevel").innerText = `Ранг: ${rank}`;
+  
+  const totalSeconds = Math.round((Date.now() - quizStartTime) / 1000);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  const timeTakenStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  document.getElementById("timeTaken").innerText = timeTakenStr;
+
+  // Сохранение рекордов
+  const best = parseInt(localStorage.getItem('bestScore') || 0);
+  if (score > best) localStorage.setItem('bestScore', score);
+  
+  const totalAtt = parseInt(localStorage.getItem('totalAttempts') || 0);
+  localStorage.setItem('totalAttempts', totalAtt + 1);
+  
+  const currentBestTime = localStorage.getItem('bestTime') || "99:99";
+  if (score >= best && timeTakenStr < currentBestTime) localStorage.setItem('bestTime', timeTakenStr);
+
+  const finalMsg = `📩 <b>Новое прохождение LavkaDor</b>\n🆔 ID: ${getUserId()}\n🎬 Дорама: Слабый герой 1\n📊 Результат: ${score} / ${quiz.length}\n💯 Процент: ${percent}%\n⏱ Время: ${mins} мин ${secs} сек\n📱 Устройство: ${/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'телефон' : 'ПК'}`;
+  sendToTelegram(finalMsg);
+}
+
+// ФУНКЦИЯ ДЛЯ КНОПКИ "РАНГ"
+function openRankModal() {
+    const percent = (score / quiz.length) * 100;
+    const modal = document.getElementById('rankModal');
+    const badge = document.getElementById('modalBadge');
+    const name = document.getElementById('modalRankName');
+    const desc = document.getElementById('modalRankDesc');
+
+    if(percent <= 30) {
+        badge.innerText = "🌱"; name.innerText = "Новичок"; desc.innerText = "Ты только начал путь в мир дорам. До ранга Фанат нужно еще " + (Math.ceil(quiz.length*0.31) - score) + " отв.";
+    } else if(percent <= 60) {
+        badge.innerText = "👀"; name.innerText = "Фанат"; desc.innerText = "Ты точно смотрел внимательно. До Эксперта осталось " + (Math.ceil(quiz.length*0.61) - score) + " отв.";
+    } else if(percent <= 85) {
+        badge.innerText = "🥊"; name.innerText = "Эксперт"; desc.innerText = "Настоящий знаток дорамы Слабый герой 1. Еще немного до Максимума!";
+    } else {
+        badge.innerText = "🧠"; name.innerText = "Сильнейший Интеллект"; desc.innerText = "Ты используешь ум как оружие! Твой уровень максимальный!";
+    }
+
+    document.getElementById('bestScore').innerText = (localStorage.getItem('bestScore') || 0) + "/20";
+    document.getElementById('bestTime').innerText = localStorage.getItem('bestTime') || "--:--";
+    document.getElementById('totalAttempts').innerText = localStorage.getItem('totalAttempts') || 0;
+    
+    modal.style.display = "flex";
+}
+
+function showAnswers() {
+  document.getElementById("results").style.display = "none";
+  const container = document.getElementById("answersContainer");
+  container.innerHTML = "<h3 style='color:#ff3cac'>Проверка ответов</h3>";
+  container.style.display = "flex";
+  
+  quiz.forEach((q, i) => {
+    const block = document.createElement("div");
+    block.className = "answer-block";
+    const isCorrect = q.userChoice === q.correct;
+    block.innerHTML = `
+      <p><b>${i+1}/${quiz.length} ${q.question}</b></p>
+      <p>Ваш ответ: <span class="${isCorrect?'correct-answer':'wrong-answer'}">${q.userChoice !== undefined ? q.options[q.userChoice] : 'Пропущено'}</span></p>
+      <p>Верно: <span class="correct-answer">${q.options[q.correct]}</span></p>
+    `;
+    container.appendChild(block);
+    setTimeout(() => { block.classList.add('show-block'); }, i * 200);
+  });
+  
+  setTimeout(() => {
+    const rb = document.createElement("button");
+    rb.innerText = "Начать заново";
+    rb.className = "answer";
+    rb.style.opacity = "1";
+    rb.style.transform = "none";
+    rb.style.background = "#ff3cac";
+    rb.style.color = "#fff";
+    rb.style.marginTop = "20px";
+    rb.onclick = restartQuiz;
+    container.appendChild(rb);
+  }, quiz.length * 200);
+}
+
+function shareResult() {
+  const rankName = document.getElementById("userLevel").innerText.replace("Ранг: ", "");
+  const text = `🥊 Я получил ранг: ${rankName}\n📺 Викторина «Слабый герой 1 сезон»\n🎯 Результат: ${score}/${quiz.length}\n\nПроверь себя 👉 @lavkador`;
+  
+  if(navigator.share) {
+    navigator.share({ title: 'Мой результат', text: text });
+  } else {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert("Результат скопирован! Отправь его друзьям.");
+  }
+}
+
+function restartQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  loadQuestion();
+}
+
+window.onload = loadQuestion;
+</script>
 </body>
 </html>
